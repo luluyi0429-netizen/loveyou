@@ -4,258 +4,320 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>For You - Luluyi's Player</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@200;300;400&display=swap" rel="stylesheet">
     <style>
-        /* 基础样式复位 */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            outline: none;
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
+
+        html, body {
+            width: 100%; height: 100%;
+            overflow: hidden;
+            background: #4a5240;
         }
 
         body {
-            /* 采用暗青色/青蓝色背景 */
-            background-color: #2b6a71; 
-            background: linear-gradient(135deg, #2b6a71 0%, #1e5a60 100%);
-            height: 100vh;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            overflow: hidden; /* 防止出现滚动条 */
-            color: #ffffff;
+            font-family: 'DM Sans', sans-serif;
+            color: #fff;
         }
 
-        /* 主体内容容器 */
-        .main-container {
-            width: 95%;
-            max-width: 1400px;
-            height: 70vh;
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(255,255,255,0.04) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(0,0,0,0.2) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        /* 固定设计尺寸 1280x720，JS 缩放适配任意窗口 */
+        #stage {
+            position: relative;
+            width: 1280px;
+            height: 720px;
+            transform-origin: center center;
             display: flex;
+            align-items: center;
             justify-content: space-between;
-            align-items: center;
-            padding: 0 3%;
-            position: relative;
+            padding: 0 80px;
+            flex-shrink: 0;
         }
 
-        /* --- 左侧：唱片组合样式 --- */
         .player-left {
-            flex: 0 0 auto;
             position: relative;
-            width: 45vw; 
-            max-width: 650px;
-            height: 40vw; 
-            max-height: 550px;
+            width: 620px;
+            height: 480px;
+            flex-shrink: 0;
             display: flex;
-            justify-content: flex-start; /* 整体靠左 */
             align-items: center;
-            padding-right: 15%; 
         }
 
-        /* 1. 后方：圆形光盘 - 核心修改：进一步缩小并固定为绝对正圆 */
+        /* 封面 360px 宽，唱片直径 340px，半径 170px */
+        /* cd-box left = 360 - 170 = 190px，使圆心对齐封面右边缘 */
         .cd-box {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            /* 将光盘中心向右微调，露出部分更自然 */
-            left: 28%; 
-            /* 【尺寸微调】将光盘宽度从 70% 缩小至 58%，达到合适大小 */
-            width: 58%; 
-            z-index: 1; /* 在方形封面下方 */
+            left: 190px;
+            width: 340px;
+            height: 340px;
+            z-index: 1;
         }
 
         .cd-disc {
-            width: 100%;
-            height: 0;
-            padding-bottom: 100%; /* 形成绝对的正圆 */
+            width: 340px;
+            height: 340px;
             border-radius: 50%;
-            background-color: #080808; 
-            border: 10px solid rgba(15, 15, 15, 1);
-            box-shadow: 10px 0 25px rgba(0, 0, 0, 0.5); 
-            position: relative; 
-            
-            animation: rotateDisk 18s linear infinite;
-            animation-play-state: paused; /* 默认暂停 */
+            position: relative;
+            animation: rotateDisk 5s linear infinite;
+            animation-play-state: paused;
+            background: radial-gradient(circle at 50% 50%,
+                #111 0%, #111 11%,
+                #222 11.5%, #111 13%, #222 13.5%, #111 15%,
+                #222 15.5%, #111 17%, #222 17.5%, #111 19%,
+                #222 19.5%, #111 21%, #222 21.5%, #111 23%,
+                #222 23.5%, #111 25%, #222 25.5%, #111 27%,
+                #222 27.5%, #111 29%, #222 29.5%, #111 31%,
+                #222 31.5%, #111 33%, #222 33.5%, #111 35%,
+                #222 35.5%, #111 37%, #222 37.5%, #111 39%,
+                #222 39.5%, #111 41%, #222 41.5%, #111 43%,
+                #222 43.5%, #111 45%, #222 45.5%, #111 47%,
+                #222 47.5%, #111 50%
+            );
+            box-shadow: 8px 8px 40px rgba(0,0,0,0.75), inset 0 0 0 1px rgba(255,255,255,0.04);
         }
 
-        /* 唱片中间的小孔与金属环 */
-        .cd-center {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 22%;
-            height: 22%;
-            background: radial-gradient(circle, #ddd 0%, #aaa 40%, rgba(200,200,200,0.8) 100%);
-            border-radius: 50%;
-            border: 1px solid rgba(255,255,255,0.4);
-            z-index: 2;
-        }
-        
-        /* 唱片纹理遮罩 */
-        .cd-disc::after {
+        .cd-disc::before {
             content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            border-radius: 50%;
-            background: repeating-radial-gradient(
-                rgba(255,255,255,0.02) 0,
-                rgba(255,255,255,0.02) 1px,
-                rgba(0,0,0,0) 2px,
-                rgba(0,0,0,0) 4px
+            position: absolute; inset: 0; border-radius: 50%;
+            background: conic-gradient(
+                from 30deg,
+                transparent 0deg, rgba(255,255,255,0.07) 15deg, transparent 40deg,
+                transparent 160deg, rgba(255,255,255,0.04) 175deg, transparent 200deg
             );
             pointer-events: none;
         }
 
-        /* 2. 前方：固定的方形专辑封面 */
-        .album-cover {
-            position: relative;
-            width: 80%; 
-            padding-bottom: 80%; 
-            height: 0;
-            background: url('ComfyUI_04383_.png') no-repeat center center / cover;
-            border-radius: 8px; 
-            box-shadow: 8px 8px 30px rgba(0, 0, 0, 0.6);
-            z-index: 3; 
-            pointer-events: none; /* 让点击能穿透到下方的覆盖层 */
+        .cd-disc::after {
+            content: '';
+            position: absolute; inset: 0; border-radius: 50%;
+            background: repeating-radial-gradient(
+                rgba(255,255,255,0.015) 0, rgba(255,255,255,0.015) 1px,
+                transparent 1px, transparent 3px
+            );
+            pointer-events: none;
         }
 
-        /* --- 右侧：文字部分 --- */
+        .cd-center {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 68px; height: 68px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 40% 35%, #e8e0d0 0%, #c8c0b0 40%, #a8a098 100%);
+            border: 1.5px solid rgba(255,255,255,0.3);
+            box-shadow: 0 0 0 3px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.4);
+            z-index: 2;
+        }
+
+        .cd-center::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            background: #0a0a0a;
+        }
+
+        .album-cover {
+            position: relative;
+            width: 360px; height: 360px;
+            flex-shrink: 0;
+            background: url('ComfyUI_04383_.png') no-repeat center center / cover;
+            background-color: #1a1a1a;
+            border-radius: 6px;
+            box-shadow: -2px 2px 0 rgba(0,0,0,0.3), 10px 14px 50px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06);
+            z-index: 3;
+        }
+
+        .album-cover::after {
+            content: '';
+            position: absolute; inset: 0; border-radius: 6px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 50%, rgba(0,0,0,0.1) 100%);
+            pointer-events: none;
+        }
+
         .player-right {
-            flex: 1 1 auto;
+            flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: flex-end; 
-            padding-left: 50px;
+            align-items: flex-end;
             text-align: right;
-            position: relative;
+            padding-left: 60px;
         }
 
         .love-text {
-            font-size: 6vw; 
+            font-family: 'Playfair Display', serif;
+            font-size: 96px;
             font-weight: 300;
-            letter-spacing: 0.15em;
+            font-style: italic;
+            letter-spacing: 0.04em;
+            line-height: 1.05;
             margin-bottom: 24px;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
-            
-            background: linear-gradient(45deg, #ff758c, #ff7eb3);
-            -webkit-background-clip: text;
-            color: transparent;
-            
-            animation: pulse 2.5s infinite alternate;
+            color: #f0e8d8;
+            animation: gentleGlow 3s ease-in-out infinite alternate;
+        }
+
+        .love-text em { color: #e8a0b0; font-style: normal; }
+
+        .divider {
+            width: 60px; height: 1px;
+            background: linear-gradient(to left, rgba(255,255,255,0.4), transparent);
+            margin: 0 0 18px auto;
+            animation: fadeInRight 1.5s ease-out 1s forwards;
+            opacity: 0;
         }
 
         .signature {
-            font-size: 1.8vw;
-            letter-spacing: 0.1em;
-            color: rgba(255, 255, 255, 0.6);
-            animation: fadeInRight 1.5s ease-out forwards;
+            font-family: 'Playfair Display', serif;
+            font-size: 22px; font-weight: 300; font-style: italic;
+            letter-spacing: 0.15em;
+            color: rgba(255,255,255,0.45);
+            animation: fadeInRight 1.5s ease-out 1.3s forwards;
             opacity: 0;
-            animation-delay: 1.5s;
         }
 
-        /* --- 下方：自定义播放控制条 --- */
+        .track-name {
+            font-size: 13px; font-weight: 200;
+            letter-spacing: 0.3em;
+            color: rgba(255,255,255,0.25);
+            margin-top: 28px;
+            animation: fadeInRight 1.5s ease-out 1.8s forwards;
+            opacity: 0;
+        }
+
+        /* 播放控制栏固定在底部，不参与 stage 缩放 */
         .player-controls {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 80px;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0) 100%);
+            position: fixed;
+            bottom: 0; left: 0; width: 100%;
+            padding: 20px 6% 28px;
+            background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%);
             display: flex;
-            justify-content: center;
             align-items: center;
-            padding: 0 10%;
+            gap: 16px;
             z-index: 10;
         }
 
-        .progress-container {
-            flex: 1;
-            height: 4px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 2px;
-            margin: 0 30px;
-            cursor: pointer;
-            position: relative;
+        .time-label {
+            font-size: 11px; font-weight: 300;
+            color: rgba(255,255,255,0.4);
+            letter-spacing: 0.05em;
+            min-width: 36px;
+            font-variant-numeric: tabular-nums;
         }
+
+        .progress-container {
+            flex: 1; height: 3px;
+            background: rgba(255,255,255,0.12);
+            border-radius: 2px;
+            cursor: pointer;
+            transition: height 0.15s;
+        }
+
+        .progress-container:hover { height: 5px; }
 
         .progress-bar {
             height: 100%;
-            background-color: #ff7eb3; 
-            width: 0%;
-            border-radius: 2px;
+            background: linear-gradient(to right, rgba(232,160,176,0.8), #e8a0b0);
+            width: 0%; border-radius: 2px;
             transition: width 0.1s linear;
+            position: relative;
         }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            right: -4px; top: 50%;
+            transform: translateY(-50%);
+            width: 9px; height: 9px;
+            border-radius: 50%;
+            background: #f0d8e0;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .progress-container:hover .progress-bar::after { opacity: 1; }
 
         .control-btn {
-            background: none;
-            border: none;
-            color: #ffffff;
-            font-size: 24px;
-            cursor: pointer;
-            padding: 10px;
-            transition: color 0.2s, transform 0.1s;
+            background: none; border: none;
+            color: rgba(255,255,255,0.75);
+            font-size: 20px; cursor: pointer;
+            padding: 8px;
+            transition: color 0.2s, transform 0.15s;
+            line-height: 1;
         }
 
-        .control-btn:hover {
-            color: #ff7eb3;
-            transform: scale(1.1);
+        .control-btn:hover { color: #e8a0b0; transform: scale(1.15); }
+        .control-btn:active { transform: scale(0.95); }
+
+        #play-overlay {
+            position: fixed; inset: 0;
+            background: rgba(20,25,20,0.92);
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            z-index: 200; cursor: pointer; gap: 16px;
+            animation: fadeIn 0.8s ease;
         }
 
-        .control-btn:active {
-            transform: scale(0.95);
+        .overlay-icon {
+            width: 64px; height: 64px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(255,255,255,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; color: rgba(255,255,255,0.7);
+            transition: border-color 0.3s, color 0.3s;
         }
 
-        /* --- 动画 --- */
+        #play-overlay:hover .overlay-icon { border-color: rgba(232,160,176,0.6); color: #e8a0b0; }
+
+        .overlay-text {
+            font-family: 'Playfair Display', serif;
+            font-style: italic; font-size: 16px;
+            letter-spacing: 0.3em;
+            color: rgba(255,255,255,0.35);
+        }
+
         @keyframes rotateDisk {
             from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            to   { transform: rotate(360deg); }
         }
 
-        @keyframes pulse {
-            0% {
-                text-shadow: 0 0 10px rgba(255, 117, 140, 0.3);
-                transform: scale(1);
-            }
-            100% {
-                text-shadow: 0 0 40px rgba(255, 126, 179, 0.7);
-                transform: scale(1.01);
-            }
+        @keyframes gentleGlow {
+            0%   { text-shadow: 0 0 40px rgba(240,200,160,0.2), 0 2px 4px rgba(0,0,0,0.3); }
+            100% { text-shadow: 0 0 80px rgba(240,200,160,0.45), 0 2px 4px rgba(0,0,0,0.3); }
         }
 
         @keyframes fadeInRight {
-            0% {
-                opacity: 0;
-                transform: translateX(20px); 
-            }
-            100% {
-                opacity: 1;
-                transform: translateX(0);
-            }
+            from { opacity: 0; transform: translateX(16px); }
+            to   { opacity: 1; transform: translateX(0); }
         }
 
-        #play-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 100; color: #fff; cursor: pointer;
-            font-size: 2vw; letter-spacing: 0.1em;
-            animation: fadeIn 0.5s;
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
         }
-        
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
     </style>
 </head>
 <body>
 
     <div id="play-overlay">
-        Click to Start the Romance
+        <div class="overlay-icon">▶</div>
+        <div class="overlay-text">Click to Start the Romance</div>
     </div>
 
-    <div class="main-container">
-        
+    <div id="stage">
         <div class="player-left">
             <div class="cd-box">
                 <div class="cd-disc" id="cdDisc">
@@ -266,77 +328,76 @@
         </div>
 
         <div class="player-right">
-            <div class="love-text">
-                LOVE YOU
-            </div>
-            <div class="signature">
-                - from Luluyi
-            </div>
+            <div class="love-text">Love<br><em>You</em></div>
+            <div class="divider"></div>
+            <div class="signature">— from Luluyi</div>
+            <div class="track-name">5月5日</div>
         </div>
-
     </div>
 
     <div class="player-controls">
-        <button class="control-btn" id="playPauseBtn">▶</button> 
+        <button class="control-btn" id="playPauseBtn">▶</button>
+        <span class="time-label" id="currentTime">0:00</span>
         <div class="progress-container" id="progressContainer">
             <div class="progress-bar" id="progressBar"></div>
         </div>
+        <span class="time-label" id="totalTime">0:00</span>
     </div>
 
     <audio id="bgMusic" src="5月5日.MP3" loop></audio>
 
     <script>
-        const playOverlay = document.getElementById('play-overlay');
-        const music = document.getElementById('bgMusic');
-        const playPauseBtn = document.getElementById('playPauseBtn');
-        const cdDisc = document.getElementById('cdDisc');
-        const progressContainer = document.getElementById('progressContainer');
-        const progressBar = document.getElementById('progressBar');
+        /* 整体缩放：保持 16:9，铺满窗口 */
+        const DESIGN_W = 1280, DESIGN_H = 720;
 
-        playOverlay.addEventListener('click', function() {
-            music.play();
-            updatePlayState(true);
-            playOverlay.style.display = 'none'; 
+        function scaleStage() {
+            const stage = document.getElementById('stage');
+            const scale = Math.min(window.innerWidth / DESIGN_W, window.innerHeight / DESIGN_H);
+            stage.style.transform = `scale(${scale})`;
+        }
+
+        scaleStage();
+        window.addEventListener('resize', scaleStage);
+
+        /* 播放器逻辑 */
+        const playOverlay   = document.getElementById('play-overlay');
+        const music         = document.getElementById('bgMusic');
+        const playPauseBtn  = document.getElementById('playPauseBtn');
+        const cdDisc        = document.getElementById('cdDisc');
+        const progressCont  = document.getElementById('progressContainer');
+        const progressBar   = document.getElementById('progressBar');
+        const currentTimeEl = document.getElementById('currentTime');
+        const totalTimeEl   = document.getElementById('totalTime');
+
+        const fmt = s => isNaN(s) ? '0:00' : `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
+
+        playOverlay.addEventListener('click', () => {
+            music.play(); setPlaying(true);
+            playOverlay.style.transition = 'opacity 0.6s';
+            playOverlay.style.opacity = '0';
+            setTimeout(() => playOverlay.style.display = 'none', 600);
         });
 
-        playPauseBtn.addEventListener('click', function() {
-            if (music.paused) {
-                music.play();
-                updatePlayState(true);
-            } else {
-                music.pause();
-                updatePlayState(false);
-            }
+        playPauseBtn.addEventListener('click', () =>
+            music.paused ? (music.play(), setPlaying(true)) : (music.pause(), setPlaying(false))
+        );
+
+        progressCont.addEventListener('click', e => {
+            if (music.duration)
+                music.currentTime = (e.offsetX / progressCont.clientWidth) * music.duration;
         });
 
-        progressContainer.addEventListener('click', function(e) {
-            const width = this.clientWidth; 
-            const clickX = e.offsetX; 
-            const duration = music.duration; 
-
-            if (duration) {
-                music.currentTime = (clickX / width) * duration;
-            }
+        music.addEventListener('timeupdate', () => {
+            if (!music.duration) return;
+            progressBar.style.width = (music.currentTime / music.duration * 100) + '%';
+            currentTimeEl.textContent = fmt(music.currentTime);
         });
 
-        music.addEventListener('timeupdate', function() {
-            const duration = music.duration;
-            const currentTime = music.currentTime;
-            
-            if (duration) {
-                const progressPercent = (currentTime / duration) * 100;
-                progressBar.style.width = `${progressPercent}%`;
-            }
-        });
+        music.addEventListener('loadedmetadata', () => { totalTimeEl.textContent = fmt(music.duration); });
 
-        function updatePlayState(isPlaying) {
-            if (isPlaying) {
-                playPauseBtn.innerHTML = '❚❚'; 
-                cdDisc.style.animationPlayState = 'running'; 
-            } else {
-                playPauseBtn.innerHTML = '▶'; 
-                cdDisc.style.animationPlayState = 'paused'; 
-            }
+        function setPlaying(on) {
+            playPauseBtn.innerHTML = on ? '❚❚' : '▶';
+            cdDisc.style.animationPlayState = on ? 'running' : 'paused';
         }
     </script>
 </body>
