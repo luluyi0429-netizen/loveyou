@@ -11,7 +11,7 @@
         html, body {
             width: 100%; height: 100%;
             overflow: hidden;
-            background: #4a5240;
+            background: #2e2e2e;
         }
 
         body {
@@ -26,12 +26,11 @@
             content: '';
             position: fixed; inset: 0;
             background:
-                radial-gradient(ellipse at 20% 50%, rgba(255,255,255,0.04) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 20%, rgba(0,0,0,0.2) 0%, transparent 50%);
+                radial-gradient(ellipse at 20% 50%, rgba(255,255,255,0.03) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(0,0,0,0.25) 0%, transparent 50%);
             pointer-events: none;
         }
 
-        /* 固定设计尺寸 1280x720，JS 缩放适配任意窗口 */
         #stage {
             position: relative;
             width: 1280px;
@@ -44,17 +43,16 @@
             flex-shrink: 0;
         }
 
+        /* ── 左侧 ── */
         .player-left {
             position: relative;
-            width: 620px;
+            width: 560px;
             height: 480px;
             flex-shrink: 0;
             display: flex;
             align-items: center;
         }
 
-        /* 封面 360px 宽，唱片直径 340px，半径 170px */
-        /* cd-box left = 360 - 170 = 190px，使圆心对齐封面右边缘 */
         .cd-box {
             position: absolute;
             top: 50%;
@@ -66,8 +64,7 @@
         }
 
         .cd-disc {
-            width: 340px;
-            height: 340px;
+            width: 340px; height: 340px;
             border-radius: 50%;
             position: relative;
             animation: rotateDisk 5s linear infinite;
@@ -151,65 +148,153 @@
         .album-cover::after {
             content: '';
             position: absolute; inset: 0; border-radius: 6px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 50%, rgba(0,0,0,0.1) 100%);
+            background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 50%, rgba(0,0,0,0.1) 100%);
             pointer-events: none;
+            z-index: 1;
         }
 
+        /* ── 右侧 ── */
         .player-right {
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: flex-end;
             text-align: right;
-            padding-left: 60px;
+            padding-left: 50px;
+            height: 560px;
+            justify-content: center;
+        }
+
+        .title-block {
+            flex-shrink: 0;
+            margin-bottom: 22px;
         }
 
         .love-text {
             font-family: 'Playfair Display', serif;
-            font-size: 96px;
+            font-size: 72px;
             font-weight: 300;
             font-style: italic;
             letter-spacing: 0.04em;
             line-height: 1.05;
-            margin-bottom: 24px;
-            color: #f0e8d8;
+            margin-bottom: 16px;
+            color: #ede8e0;
             animation: gentleGlow 3s ease-in-out infinite alternate;
         }
 
-        .love-text em { color: #e8a0b0; font-style: normal; }
+        .love-text em { color: #d4a0b0; font-style: normal; }
 
         .divider {
             width: 60px; height: 1px;
-            background: linear-gradient(to left, rgba(255,255,255,0.4), transparent);
-            margin: 0 0 18px auto;
+            background: linear-gradient(to left, rgba(255,255,255,0.3), transparent);
+            margin: 0 0 12px auto;
             animation: fadeInRight 1.5s ease-out 1s forwards;
+            opacity: 0;
+        }
+
+        .meta-row {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+            animation: fadeInRight 1.5s ease-out 1.3s forwards;
             opacity: 0;
         }
 
         .signature {
             font-family: 'Playfair Display', serif;
-            font-size: 22px; font-weight: 300; font-style: italic;
+            font-size: 18px; font-weight: 300; font-style: italic;
             letter-spacing: 0.15em;
-            color: rgba(255,255,255,0.45);
-            animation: fadeInRight 1.5s ease-out 1.3s forwards;
-            opacity: 0;
+            color: rgba(255,255,255,0.38);
         }
 
         .track-name {
-            font-size: 13px; font-weight: 200;
-            letter-spacing: 0.3em;
-            color: rgba(255,255,255,0.25);
-            margin-top: 28px;
+            font-size: 11px; font-weight: 200;
+            letter-spacing: 0.28em;
+            color: rgba(255,255,255,0.18);
+        }
+
+        /* ── 歌词区 ── */
+        .lyrics-outer {
+            width: 100%;
+            height: 268px;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
             animation: fadeInRight 1.5s ease-out 1.8s forwards;
             opacity: 0;
         }
 
-        /* 播放控制栏固定在底部，不参与 stage 缩放 */
+        .lyrics-outer::before,
+        .lyrics-outer::after {
+            content: '';
+            position: absolute; left: 0; right: 0;
+            height: 60px;
+            z-index: 2;
+            pointer-events: none;
+        }
+        .lyrics-outer::before {
+            top: 0;
+            background: linear-gradient(to bottom, #2e2e2e, transparent);
+        }
+        .lyrics-outer::after {
+            bottom: 0;
+            background: linear-gradient(to top, #2e2e2e, transparent);
+        }
+
+        .lyrics-scroll {
+            position: absolute;
+            width: 100%;
+            transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .lyric-line {
+            padding: 7px 0;
+        }
+
+        .lyric-line .en {
+            font-family: 'Playfair Display', serif;
+            font-size: 14px;
+            font-weight: 300;
+            font-style: italic;
+            letter-spacing: 0.04em;
+            color: rgba(255,255,255,0.22);
+            line-height: 1.5;
+            transition: color 0.4s, font-size 0.35s;
+        }
+
+        .lyric-line .zh {
+            font-size: 11px;
+            font-weight: 200;
+            letter-spacing: 0.1em;
+            color: rgba(255,255,255,0.14);
+            line-height: 1.6;
+            margin-top: 1px;
+            transition: color 0.4s;
+        }
+
+        .lyric-line.active .en {
+            font-size: 16px;
+            color: rgba(238, 228, 218, 0.95);
+        }
+
+        .lyric-line.active .zh {
+            color: rgba(212, 160, 176, 0.88);
+        }
+
+        .lyric-line.prev .en {
+            color: rgba(255,255,255,0.38);
+        }
+        .lyric-line.prev .zh {
+            color: rgba(255,255,255,0.22);
+        }
+
+        /* ── 控制栏 ── */
         .player-controls {
             position: fixed;
             bottom: 0; left: 0; width: 100%;
             padding: 20px 6% 28px;
-            background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%);
+            background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
             display: flex;
             align-items: center;
             gap: 16px;
@@ -218,7 +303,7 @@
 
         .time-label {
             font-size: 11px; font-weight: 300;
-            color: rgba(255,255,255,0.4);
+            color: rgba(255,255,255,0.35);
             letter-spacing: 0.05em;
             min-width: 36px;
             font-variant-numeric: tabular-nums;
@@ -226,7 +311,7 @@
 
         .progress-container {
             flex: 1; height: 3px;
-            background: rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.1);
             border-radius: 2px;
             cursor: pointer;
             transition: height 0.15s;
@@ -236,7 +321,7 @@
 
         .progress-bar {
             height: 100%;
-            background: linear-gradient(to right, rgba(232,160,176,0.8), #e8a0b0);
+            background: linear-gradient(to right, rgba(212,160,176,0.8), #d4a0b0);
             width: 0%; border-radius: 2px;
             transition: width 0.1s linear;
             position: relative;
@@ -249,7 +334,7 @@
             transform: translateY(-50%);
             width: 9px; height: 9px;
             border-radius: 50%;
-            background: #f0d8e0;
+            background: #e8c8d0;
             opacity: 0;
             transition: opacity 0.2s;
         }
@@ -258,19 +343,19 @@
 
         .control-btn {
             background: none; border: none;
-            color: rgba(255,255,255,0.75);
+            color: rgba(255,255,255,0.6);
             font-size: 20px; cursor: pointer;
             padding: 8px;
             transition: color 0.2s, transform 0.15s;
             line-height: 1;
         }
 
-        .control-btn:hover { color: #e8a0b0; transform: scale(1.15); }
+        .control-btn:hover { color: #d4a0b0; transform: scale(1.15); }
         .control-btn:active { transform: scale(0.95); }
 
         #play-overlay {
             position: fixed; inset: 0;
-            background: rgba(20,25,20,0.92);
+            background: rgba(10,10,10,0.92);
             display: flex; flex-direction: column;
             justify-content: center; align-items: center;
             z-index: 200; cursor: pointer; gap: 16px;
@@ -280,36 +365,56 @@
         .overlay-icon {
             width: 64px; height: 64px;
             border-radius: 50%;
-            border: 1.5px solid rgba(255,255,255,0.2);
+            border: 1.5px solid rgba(255,255,255,0.15);
             display: flex; align-items: center; justify-content: center;
-            font-size: 22px; color: rgba(255,255,255,0.7);
+            font-size: 22px; color: rgba(255,255,255,0.6);
             transition: border-color 0.3s, color 0.3s;
         }
 
-        #play-overlay:hover .overlay-icon { border-color: rgba(232,160,176,0.6); color: #e8a0b0; }
+        #play-overlay:hover .overlay-icon { border-color: rgba(212,160,176,0.6); color: #d4a0b0; }
 
         .overlay-text {
             font-family: 'Playfair Display', serif;
             font-style: italic; font-size: 16px;
             letter-spacing: 0.3em;
-            color: rgba(255,255,255,0.35);
+            color: rgba(255,255,255,0.28);
+        }
+
+        /* ── 浏览量 ── */
+        .view-count {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 6px;
+            font-size: 11px;
+            font-weight: 200;
+            letter-spacing: 0.2em;
+            color: rgba(255,255,255,0.15);
+            transition: color 0.3s;
+        }
+
+        .view-count .dot {
+            width: 3px; height: 3px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+        }
+
+        .view-count #viewNum {
+            font-variant-numeric: tabular-nums;
         }
 
         @keyframes rotateDisk {
             from { transform: rotate(0deg); }
             to   { transform: rotate(360deg); }
         }
-
         @keyframes gentleGlow {
-            0%   { text-shadow: 0 0 40px rgba(240,200,160,0.2), 0 2px 4px rgba(0,0,0,0.3); }
-            100% { text-shadow: 0 0 80px rgba(240,200,160,0.45), 0 2px 4px rgba(0,0,0,0.3); }
+            0%   { text-shadow: 0 0 40px rgba(220,200,180,0.15), 0 2px 4px rgba(0,0,0,0.4); }
+            100% { text-shadow: 0 0 80px rgba(220,200,180,0.35), 0 2px 4px rgba(0,0,0,0.4); }
         }
-
         @keyframes fadeInRight {
             from { opacity: 0; transform: translateX(16px); }
             to   { opacity: 1; transform: translateX(0); }
         }
-
         @keyframes fadeIn {
             from { opacity: 0; }
             to   { opacity: 1; }
@@ -336,10 +441,23 @@
         </div>
 
         <div class="player-right">
-            <div class="love-text">Love<br><em>You</em></div>
-            <div class="divider"></div>
-            <div class="signature">— from Luluyi</div>
-            <div class="track-name">5月5日</div>
+            <div class="title-block">
+                <div class="love-text">Love<br><em>You</em></div>
+                <div class="divider"></div>
+                <div class="meta-row">
+                    <div class="signature">— from Luluyi</div>
+                    <div class="track-name">My Love Mine All Mine · Mitski</div>
+                    <div class="view-count">
+                        <span class="dot"></span>
+                        <span id="viewNum">···</span>
+                        <span>views</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lyrics-outer">
+                <div class="lyrics-scroll" id="lyricsScroll"></div>
+            </div>
         </div>
     </div>
 
@@ -355,19 +473,79 @@
     <audio id="bgMusic" src="5月5日.MP3" loop></audio>
 
     <script>
-        /* 整体缩放：保持 16:9，铺满窗口 */
+        /* ── 缩放舞台 ── */
         const DESIGN_W = 1280, DESIGN_H = 720;
-
         function scaleStage() {
-            const stage = document.getElementById('stage');
             const scale = Math.min(window.innerWidth / DESIGN_W, window.innerHeight / DESIGN_H);
-            stage.style.transform = `scale(${scale})`;
+            document.getElementById('stage').style.transform = `scale(${scale})`;
         }
-
         scaleStage();
         window.addEventListener('resize', scaleStage);
 
-        /* 播放器逻辑 */
+        /* ── 歌词数据（精确时间戳，单位：秒） ── */
+        const lyrics = [
+            { time:  2.1,  en: "Moon a hole of light",                zh: "月光，透过光的缝隙倾泻而下" },
+            { time:  6.0,  en: "Through the big top tent up high",    zh: "穿过高耸云端的天幕" },
+            { time: 10.0,  en: "Here before and after me",            zh: "遥远的以前，遥远的以后" },
+            { time: 13.5,  en: "Shinin' down on me",                  zh: "光芒洒落我身上" },
+            { time: 19.0,  en: "Moon tell me if I could",             zh: "月儿，告诉我能否" },
+            { time: 22.5,  en: "Send up my heart to you",             zh: "将我的心送给你" },
+            { time: 27.0,  en: "So when I die which I must do",       zh: "当我生命走向终点时，我该做些什么" },
+            { time: 30.0,  en: "Could it shine down here with you",   zh: "才能与你一起光芒闪耀" },
+            { time: 35.0,  en: "'Cause my love is mine all mine",     zh: "因为我的爱只属于我，只属于我" },
+            { time: 38.5,  en: "I love mine mine mine",               zh: "我爱的也只是我自己" },
+            { time: 43.0,  en: "Nothing in the world belongs to me",  zh: "这世界没什么属于我" },
+            { time: 47.0,  en: "But my love mine all mine all mine",  zh: "但我的爱完全属于我自己，我自己" },
+            { time: 70.0,  en: "My baby here on earth",               zh: "这世界我的心爱之人" },
+            { time: 73.0,  en: "Showed me what my heart was worth",   zh: "让我明白我的真心无比珍贵" },
+            { time: 77.0,  en: "So when it comes to be my turn",      zh: "所以当我表达爱意的时候" },
+            { time: 81.0,  en: "Could you shine it down here for her",zh: "你能否将光芒倾洒于她？" },
+            { time: 85.0,  en: "'Cause my love is mine all mine",     zh: "因为我的爱只属于我，只属于我" },
+            { time: 89.0,  en: "I love mine mine mine",               zh: "我爱的也只是我自己" },
+            { time: 94.0,  en: "Nothing in the world belongs to me",  zh: "这世界没什么属于我" },
+            { time: 97.0,  en: "But my love mine all mine",           zh: "而我的爱只属于我，只属于我" },
+            { time:100.0,  en: "Nothing in the world is mine for free",zh: "这世界对我来说都标有价格" },
+            { time:105.0,  en: "But my love mine all mine all mine",  zh: "但我的爱完全属于我自己，我自己" },
+        ];
+
+        /* ── 渲染歌词行 ── */
+        const scroll = document.getElementById('lyricsScroll');
+        const LINE_H = 58;
+        const OUTER_H = 268;
+        const CENTER_OFFSET = OUTER_H / 2 - LINE_H / 2;
+
+        lyrics.forEach((l, i) => {
+            const div = document.createElement('div');
+            div.className = 'lyric-line';
+            div.id = 'line-' + i;
+            div.innerHTML = `<div class="en">${l.en}</div><div class="zh">${l.zh}</div>`;
+            scroll.appendChild(div);
+        });
+
+        /* ── 时间格式：用户输入 "1.10" 代表 1分10秒，转换为秒 ── */
+        // 已在上方直接换算好：1分10秒=70s, 1分13秒=73s, 以此类推
+
+        let curIdx = -1;
+
+        function updateLyrics(t) {
+            let idx = 0;
+            for (let i = lyrics.length - 1; i >= 0; i--) {
+                if (t >= lyrics[i].time) { idx = i; break; }
+            }
+            if (idx === curIdx) return;
+            curIdx = idx;
+
+            document.querySelectorAll('.lyric-line').forEach((el, i) => {
+                el.classList.remove('active', 'prev');
+                if (i === idx)     el.classList.add('active');
+                if (i === idx - 1) el.classList.add('prev');
+            });
+
+            const offset = CENTER_OFFSET - idx * LINE_H;
+            scroll.style.transform = `translateY(${offset}px)`;
+        }
+
+        /* ── 播放器逻辑 ── */
         const playOverlay   = document.getElementById('play-overlay');
         const music         = document.getElementById('bgMusic');
         const playPauseBtn  = document.getElementById('playPauseBtn');
@@ -399,14 +577,39 @@
             if (!music.duration) return;
             progressBar.style.width = (music.currentTime / music.duration * 100) + '%';
             currentTimeEl.textContent = fmt(music.currentTime);
+            updateLyrics(music.currentTime);
         });
 
-        music.addEventListener('loadedmetadata', () => { totalTimeEl.textContent = fmt(music.duration); });
+        music.addEventListener('loadedmetadata', () => {
+            totalTimeEl.textContent = fmt(music.duration);
+        });
 
         function setPlaying(on) {
             playPauseBtn.innerHTML = on ? '❚❚' : '▶';
             cdDisc.style.animationPlayState = on ? 'running' : 'paused';
         }
+
+        /* ── 浏览量统计（CountAPI） ── */
+        // 命名空间用你的域名，key 唯一标识这个页面
+        const NAMESPACE = 'luluyi-player';
+        const KEY       = 'for-you-views';
+        const API       = `https://api.countapi.xyz/hit/${NAMESPACE}/${KEY}`;
+
+        fetch(API)
+            .then(r => r.json())
+            .then(data => {
+                const n = data.value;
+                // 格式化：超过万显示 1.2w
+                let display;
+                if (n >= 10000) display = (n / 10000).toFixed(1) + 'w';
+                else            display = n.toLocaleString();
+                document.getElementById('viewNum').textContent = display;
+            })
+            .catch(() => {
+                document.getElementById('viewNum').textContent = '—';
+            });
+
+        updateLyrics(0);
     </script>
 </body>
 </html>
